@@ -976,7 +976,7 @@ export function doActivity(id) {
       const partner = makePerson({ age: Math.max(18, p.age + randInt(-4, 4)), relation: 'Partner', lastName: randomLastName(), bond: randInt(45, 65) });
       out.modal = {
         title: 'Love Interest',
-        body: `<div class="modal-avatar-row"><div class="avatar avatar-lg">${avatarSVG(partner.avatar)}</div><div class="who"><b>${partner.firstName} ${partner.lastName}</b><span>${partner.age} · ${partner.gender === 'female' ? 'Woman' : 'Man'} · ${rand(['Kind', 'Funny', 'Ambitious', 'Adventurous', 'Mysterious'])}</span></div></div><p>You matched with someone interesting. Want to ask them out?</p>`,
+        body: `<div class="modal-avatar-row"><div class="avatar avatar-lg">${avatarSVG(partner.avatar, { age: partner.age })}</div><div class="who"><b>${partner.firstName} ${partner.lastName}</b><span>${partner.age} · ${partner.gender === 'female' ? 'Woman' : 'Man'} · ${rand(['Kind', 'Funny', 'Ambitious', 'Adventurous', 'Mysterious'])}</span></div></div><p>You matched with someone interesting. Want to ask them out?</p>`,
         options: [
           { label: 'Ask them out', action: () => askOut(partner) },
           { label: 'Not my type', action: () => ({ toast: 'You passed on the date.' }) },

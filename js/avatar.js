@@ -25,6 +25,46 @@ export function shade(hex, amt = -18) {
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
+export function mix(hex, target, t = 0.5) {
+  const a = parseInt(hex.slice(1), 16), b = parseInt(target.slice(1), 16);
+  const k = Math.max(0, Math.min(1, t));
+  const r = Math.round(((a >> 16) & 255) * (1 - k) + ((b >> 16) & 255) * k);
+  const g = Math.round(((a >> 8) & 255) * (1 - k) + ((b >> 8) & 255) * k);
+  const bl = Math.round((a & 255) * (1 - k) + (b & 255) * k);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1);
+}
+
+function babyHair(hair, hi) {
+  return `<g fill="${hair}">
+    <path d="M49 26 C51 15 66 13 71 23 C65 18 56 18 49 26 Z"/>
+    <path d="M58 14 C60 8 66 7 69 11 C65 11 62 13 60 17 Z"/>
+  </g><path d="M53 18 C56 13 63 12 67 16" fill="none" stroke="${hi}" stroke-width="2" stroke-linecap="round" opacity=".5"/>`;
+}
+
+function wrinklesFor(age, skin) {
+  if (age == null || age < 45) return '';
+  const t = Math.min(1, (age - 45) / 40);
+  const stroke = shade(skin.shade, -16);
+  return `<g fill="none" stroke="${stroke}" stroke-linecap="round" opacity="${(0.18 + t * 0.34).toFixed(2)}">
+    <path d="M45 40.5 Q51.5 38.4 58 40.5" stroke-width="1"/>
+    <path d="M62 40.5 Q68.5 38.4 75 40.5" stroke-width="1"/>
+    ${age >= 58 ? '<path d="M45 44 Q51.5 42.2 58 44" stroke-width=".9"/><path d="M62 44 Q68.5 42.2 75 44" stroke-width=".9"/>' : ''}
+    <path d="M39 54 Q36.6 56.4 39.2 58.8" stroke-width=".9"/>
+    <path d="M81 54 Q83.4 56.4 80.8 58.8" stroke-width=".9"/>
+    <path d="M51.5 68.6 Q53.6 74 51.4 77.6" stroke-width="1"/>
+    <path d="M68.5 68.6 Q66.4 74 68.6 77.6" stroke-width="1"/>
+  </g>`;
+}
+
+function ageSpotsFor(age, skin) {
+  if (age == null || age < 64) return '';
+  return `<g fill="${shade(skin.shade, -18)}" opacity=".32">
+    <circle cx="40.5" cy="62" r="1.25"/><circle cx="45" cy="48.5" r=".9"/>
+    <circle cx="78.5" cy="64" r="1.1"/><circle cx="74" cy="47.5" r="1"/>
+    <circle cx="43" cy="71" r=".8"/><circle cx="76.5" cy="70.5" r=".8"/>
+  </g>`;
+}
+
 function hairBack(style, hair, hi) {
   switch (style) {
     case 4: // long
@@ -88,6 +128,7 @@ function hairFront(style, hair, hi) {
 }
 
 export function avatarSVG(a, opts = {}) {
+  const age = Number.isFinite(opts.age) ? opts.age : null;
   const skin = SKIN_TONES[a.skin] || SKIN_TONES[0];
   const hair = HAIR_COLORS[a.hairColor] || HAIR_COLORS[0];
   const eye = EYE_COLORS[a.eye] || EYE_COLORS[0];
@@ -97,10 +138,19 @@ export function avatarSVG(a, opts = {}) {
   const bg1 = `hsl(${hue} 26% 26%)`;
   const bg2 = `hsl(${(hue + 34) % 360} 30% 16%)`;
   const gid = 'g' + id;
-  const beard = a.facialHair;
 
-  const eyebrows = `<path d="M42 45.5 Q48.5 42 55 45.5" fill="none" stroke="${shade(hair.base, -8)}" stroke-width="2.7" stroke-linecap="round"/>
-    <path d="M65 45.5 Q71.5 42 78 45.5" fill="none" stroke="${shade(hair.base, -8)}" stroke-width="2.7" stroke-linecap="round"/>`;
+  // Age shapes the character: babies have a wisp of hair, children lose the
+  // beard, adults keep their chosen look, and elders gray and wrinkle.
+  const gray = age == null ? 0 : age < 42 ? 0 : Math.min(1, (age - 42) / 38);
+  const hairBase = gray ? mix(hair.base, '#c3c7cc', gray) : hair.base;
+  const hairHi = gray ? mix(hair.hi, '#f0f2f4', gray) : hair.hi;
+  const isBaby = age != null && age < 3;
+  const isChild = age != null && age < 13;
+  const beard = isChild ? 'none' : a.facialHair;
+  const browColor = shade(hairBase, -8);
+
+  const eyebrows = `<path d="M42 45.5 Q48.5 42 55 45.5" fill="none" stroke="${browColor}" stroke-width="${isBaby ? 1.5 : 2.7}" stroke-linecap="round" opacity="${isBaby ? .55 : 1}"/>
+    <path d="M65 45.5 Q71.5 42 78 45.5" fill="none" stroke="${browColor}" stroke-width="${isBaby ? 1.5 : 2.7}" stroke-linecap="round" opacity="${isBaby ? .55 : 1}"/>`;
 
   const eyes = `<g>
       <ellipse cx="48.5" cy="56" rx="5.6" ry="6.1" fill="#fff"/>
@@ -126,11 +176,11 @@ export function avatarSVG(a, opts = {}) {
        <path d="M53.5 74.3 Q60 78.8 66.5 74.3" fill="none" stroke="#fff" stroke-width="1.3" opacity=".55"/>`;
 
   const facial = (() => {
-    if (beard === 'stache') return `<path d="M49 70.4 Q54.5 66.6 60 69.4 Q65.5 66.6 71 70.4 Q65.5 72.5 60 70.8 Q54.5 72.5 49 70.4 Z" fill="${hair.base}"/>`;
-    if (beard === 'goatee') return `<path d="M49 70.4 Q54.5 66.6 60 69.4 Q65.5 66.6 71 70.4 Q65.5 72.5 60 70.8 Q54.5 72.5 49 70.4 Z" fill="${hair.base}"/>
-      <path d="M53.5 80 Q60 83.4 66.5 80 Q65.5 88 60 89 Q54.5 88 53.5 80 Z" fill="${hair.base}"/>`;
-    if (beard === 'beard') return `<path d="M33 55 C33 78 44 91 60 91 C76 91 87 78 87 55 C84 71 75 80 60 80 C45 80 36 71 33 55 Z" fill="${hair.base}"/>
-      <path d="M49 70.4 Q54.5 66.6 60 69.4 Q65.5 66.6 71 70.4 Q65.5 72.5 60 70.8 Q54.5 72.5 49 70.4 Z" fill="${hair.base}"/>`;
+    if (beard === 'stache') return `<path d="M49 70.4 Q54.5 66.6 60 69.4 Q65.5 66.6 71 70.4 Q65.5 72.5 60 70.8 Q54.5 72.5 49 70.4 Z" fill="${hairBase}"/>`;
+    if (beard === 'goatee') return `<path d="M49 70.4 Q54.5 66.6 60 69.4 Q65.5 66.6 71 70.4 Q65.5 72.5 60 70.8 Q54.5 72.5 49 70.4 Z" fill="${hairBase}"/>
+      <path d="M53.5 80 Q60 83.4 66.5 80 Q65.5 88 60 89 Q54.5 88 53.5 80 Z" fill="${hairBase}"/>`;
+    if (beard === 'beard') return `<path d="M33 55 C33 78 44 91 60 91 C76 91 87 78 87 55 C84 71 75 80 60 80 C45 80 36 71 33 55 Z" fill="${hairBase}"/>
+      <path d="M49 70.4 Q54.5 66.6 60 69.4 Q65.5 66.6 71 70.4 Q65.5 72.5 60 70.8 Q54.5 72.5 49 70.4 Z" fill="${hairBase}"/>`;
     return '';
   })();
 
@@ -158,7 +208,7 @@ export function avatarSVG(a, opts = {}) {
     </defs>
     <rect width="120" height="120" fill="url(#${gid})"/>
     <circle cx="60" cy="60" r="60" fill="none"/>
-    ${hairBack(a.hair, hair.base, hair.hi)}
+    ${isBaby ? babyHair(hairBase, hairHi) : hairBack(a.hair, hairBase, hairHi)}
     <path d="M15 122 C17 102 30 90 47 87 L73 87 C90 90 103 102 105 122 Z" fill="${clothes}"/>
     <path d="M47 87 C50 95 55 100 60 100 C65 100 70 95 73 87 L67 87 C65 91 62 94 60 94 C58 94 55 91 53 87 Z" fill="${shade(clothes, 18)}"/>
     <path d="M51 76 L51 88 C51 93 56 96 60 96 C64 96 69 93 69 88 L69 76 Z" fill="${skin.shade}"/>
@@ -169,16 +219,18 @@ export function avatarSVG(a, opts = {}) {
     <ellipse cx="85.5" cy="59" rx="2.4" ry="3.4" fill="${skin.shade}"/>
     <path d="M60 17 C78 17 89 31 89 52 C89 74 77 88 60 88 C43 88 31 74 31 52 C31 31 42 17 60 17 Z" fill="${skin.base}"/>
     <path d="M60 17 C69 17 76 20 81 27 C75 24 69 22 62 22 C50 22 40 27 34 36 C36 26 46 17 60 17 Z" fill="${skin.light}" opacity=".35"/>
-    <ellipse cx="43" cy="67" rx="5.4" ry="3.2" fill="#e8836f" opacity=".18"/>
-    <ellipse cx="77" cy="67" rx="5.4" ry="3.2" fill="#e8836f" opacity=".18"/>
-    ${hairFront(a.hair, hair.base, hair.hi)}
+    <ellipse cx="43" cy="67" rx="5.4" ry="3.2" fill="#e8836f" opacity="${isBaby ? .3 : .18}"/>
+    <ellipse cx="77" cy="67" rx="5.4" ry="3.2" fill="#e8836f" opacity="${isBaby ? .3 : .18}"/>
+    ${isBaby ? '' : hairFront(a.hair, hairBase, hairHi)}
     ${eyebrows}
     ${eyes}
     ${nose}
     ${mouth}
     ${facial}
+    ${wrinklesFor(age, skin)}
     ${glasses}
     ${freckles}
+    ${ageSpotsFor(age, skin)}
     ${earrings}
     <path d="M60 19 C56 19 52 21 49 24" fill="none" stroke="${skin.light}" stroke-width="2" opacity=".18" stroke-linecap="round"/>
   </svg>`;

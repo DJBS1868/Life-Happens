@@ -20,9 +20,12 @@ function displayMoney(n) {
   if (Math.abs(n) >= 1_000_000) return money(n);
   return moneyFull(n);
 }
-function plural(n, word) { return `${n} ${word}${n === 1 ? '' : 's'}`; }
+const IRREGULAR_PLURALS = { child: 'children', person: 'people', life: 'lives', man: 'men', woman: 'women' };
+function plural(n, word) { return `${n} ${n === 1 ? word : (IRREGULAR_PLURALS[word] || word + 's')}`; }
 function flagHTML(code) { return flagSVG(code); }
-function avatarHTML(a, cls = 'avatar-md') { return `<div class="${cls}">${avatarSVG(a)}</div>`; }
+function avatarHTML(a, cls = 'avatar-md', age = null) { return `<div class="${cls}">${avatarSVG(a, { age })}</div>`; }
+const PET_EMOJI = { Biscuit: '🐶', Pepper: '🐱', Mochi: '🐱', Waffles: '🐶', Shadow: '🐱', Luna: '🐱', Charlie: '🐶', Bean: '🐱' };
+function petEmoji(r) { return PET_EMOJI[r.firstName] || '🐾'; }
 
 // ---------------------------------------------------------------------------
 // Sound & haptics
@@ -102,10 +105,12 @@ export function showScreen(name) {
 
 function renderTitle() {
   const saved = G.hasSave();
-  $('#titleAvatar').innerHTML = avatarSVG(randomAvatar(chance(.5) ? 'female' : 'male'));
+  const p = G.state.player;
+  $('#titleAvatar').innerHTML = saved && p
+    ? avatarSVG(p.avatar, { age: p.age })
+    : avatarSVG(randomAvatar(chance(.5) ? 'female' : 'male'), { age: 26 });
   $('#btnContinue').classList.toggle('hidden', !saved);
   $('#btnPlay').textContent = saved ? 'New Life' : 'Play';
-  $('#btnCreate').textContent = saved ? 'Create a Life' : 'Create a Life';
 }
 
 export function newDraft() {
@@ -123,7 +128,7 @@ function renderCreate() {
   if (!draft) draft = newDraft();
   $('#inputFirst').value = draft.firstName;
   $('#inputLast').value = draft.lastName;
-  $('#createAvatar').innerHTML = avatarSVG(draft.avatar);
+  $('#createAvatar').innerHTML = avatarSVG(draft.avatar, { age: 0 });
   $('#countryName').textContent = draft.country.name;
   $('#countryFlag').innerHTML = flagHTML(draft.country.code);
   $$('#genderSegment button').forEach(b => b.classList.toggle('active', b.dataset.gender === draft.gender));
@@ -134,13 +139,13 @@ function renderSwatches() {
   skin.innerHTML = SKIN_TONES.map((s, i) => `<button class="swatch ${i === draft.avatar.skin ? 'active' : ''}" data-skin="${i}" style="background:${s.base}" aria-label="Skin tone ${i + 1}"></button>`).join('');
   const hair = $('#hairSwatches');
   hair.innerHTML = HAIR_COLORS.map((h, i) => `<button class="swatch ${i === draft.avatar.hairColor ? 'active' : ''}" data-hair="${i}" style="background:${h.base}" aria-label="${h.name} hair"></button>`).join('');
-  $$('.swatch[data-skin]').forEach(b => b.onclick = () => { draft.avatar.skin = +b.dataset.skin; $('#createAvatar').innerHTML = avatarSVG(draft.avatar); renderSwatches(); });
-  $$('.swatch[data-hair]').forEach(b => b.onclick = () => { draft.avatar.hairColor = +b.dataset.hair; $('#createAvatar').innerHTML = avatarSVG(draft.avatar); renderSwatches(); });
+  $$('.swatch[data-skin]').forEach(b => b.onclick = () => { draft.avatar.skin = +b.dataset.skin; $('#createAvatar').innerHTML = avatarSVG(draft.avatar, { age: 0 }); renderSwatches(); });
+  $$('.swatch[data-hair]').forEach(b => b.onclick = () => { draft.avatar.hairColor = +b.dataset.hair; $('#createAvatar').innerHTML = avatarSVG(draft.avatar, { age: 0 }); renderSwatches(); });
 }
 function shuffleLook() {
   const a = randomAvatar(draft.gender);
   draft.avatar = { ...a, skin: chance(.5) ? a.skin : draft.avatar.skin, hairColor: chance(.5) ? a.hairColor : draft.avatar.hairColor };
-  $('#createAvatar').innerHTML = avatarSVG(draft.avatar);
+  $('#createAvatar').innerHTML = avatarSVG(draft.avatar, { age: 0 });
   renderSwatches();
 }
 function randomizeAll() {
@@ -165,7 +170,7 @@ export function renderGame(scroll = false) {
   const p = G.state.player;
   if (!p) return;
   const c = G.countryByCode(p.country);
-  $('#charAvatar').innerHTML = avatarSVG(p.avatar);
+  $('#charAvatar').innerHTML = avatarSVG(p.avatar, { age: p.age });
   $('#charFlag').innerHTML = flagHTML(p.country);
   $('#charName').textContent = fullName(p);
   $('#charOccEmoji').textContent = G.occupationEmoji(p);
@@ -213,7 +218,11 @@ function renderLog(scroll) {
     }
     html += `<div class="log-line ${entry.type || ''}">${esc(entry.text)}</div>`;
   }
-  if (!p.log.length) html = '<div class="log-empty">Your story begins...</div>';
+  if (!p.log.length) {
+    html = '<div class="log-empty">Your story begins...</div>';
+  } else if (p.age > lastAge) {
+    html += `<div class="log-age">Age: ${p.age} ${p.age === 1 ? 'year' : 'years'}</div>`;
+  }
   log.innerHTML = html;
   if (scroll) requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
 }
@@ -419,7 +428,9 @@ function renderAssetsPanel(body) {
     <div class="action-grid">
       ${['Vehicle', 'Property', 'Luxury', 'Tech'].map(t => {
         const icons = { Vehicle: '🚗', Property: '🏠', Luxury: '💎', Tech: '📱' };
-        return `<button class="action-tile" data-shop="${t}"><span class="tile-emoji">${icons[t]}</span><span class="tile-name">${t === 'Vehicle' ? 'Vehicles' : t === 'Property' ? 'Properties' : t === 'Luxury' ? 'Luxury' : 'Tech'}</span><span class="tile-sub">Browse ${t.toLowerCase()}s</span></button>`;
+        const names = { Vehicle: 'Vehicles', Property: 'Properties', Luxury: 'Luxury', Tech: 'Tech' };
+        const browse = { Vehicle: 'Browse vehicles', Property: 'Browse properties', Luxury: 'Browse luxury items', Tech: 'Browse tech' };
+        return `<button class="action-tile" data-shop="${t}"><span class="tile-emoji">${icons[t]}</span><span class="tile-name">${names[t]}</span><span class="tile-sub">${browse[t]}</span></button>`;
       }).join('')}
     </div>`;
   body.innerHTML = html;
@@ -514,7 +525,7 @@ function renderRelationshipsPanel(body) {
     for (const r of list) {
       if (!r.alive && title !== 'In Memory') continue;
       s += `<button class="person-row" data-person="${r.id}">
-        ${avatarHTML(r.avatar, 'avatar-md')}
+        ${r.pet ? `<div class="avatar avatar-md pet-avatar">${petEmoji(r)}</div>` : avatarHTML(r.avatar, 'avatar-md', r.age)}
         <span class="person-main">
           <span class="person-name">${esc(G.personName(r))} <span class="age">${r.pet ? 'pet' : r.age}</span> ${r.alive ? '' : '<span class="relation-heart" style="color:#8b96a3">🪦</span>'}</span>
           <span class="person-rel">${r.relation}${r.alive ? '' : ' · deceased'}</span>
@@ -572,8 +583,8 @@ function showPersonModal(r) {
     }
   }
   const body = `<div class="modal-avatar-row">
-      <div class="avatar avatar-lg">${avatarSVG(r.avatar)}</div>
-      <div class="who"><b>${esc(G.personName(r))}</b><span>${esc(relationLabel)} · ${r.pet ? 'a very good pet' : `${r.age} years old`}</span></div>
+      ${r.pet ? `<div class="avatar avatar-lg pet-avatar">${petEmoji(r)}</div>` : `<div class="avatar avatar-lg">${avatarSVG(r.avatar, { age: r.age })}</div>`}
+      <div class="who"><b>${esc(G.personName(r))}</b><span>${esc(relationLabel)} · ${r.pet ? 'a very good pet' : `${r.age} year${r.age === 1 ? '' : 's'} old`}</span></div>
     </div>
     <div class="profile-table">
       <div class="pt-row"><span>Relationship</span><b>${r.alive ? Math.round(r.bond) + '%' : 'Deceased'}</b></div>
@@ -683,7 +694,7 @@ function renderMenuPanel(body) {
   const title = p.age >= 65 ? 'Retired Legend' : p.age >= 30 ? 'Certified Bitizen' : 'Rising Star';
   let html = `<div class="hero-card">
     <div class="hero-top">
-      <div class="avatar avatar-lg">${avatarSVG(p.avatar)}</div>
+      <div class="avatar avatar-lg">${avatarSVG(p.avatar, { age: p.age })}</div>
       <div class="hero-info">
         <div class="hero-kicker">${esc(title)}</div>
         <div class="hero-title">${esc(fullName(p))}</div>
@@ -699,6 +710,7 @@ function renderMenuPanel(body) {
     ['settings', '⚙️', 'Settings', 'Sound, haptics and saved data'],
     ['save', '💾', 'Save Game', 'Keep your life safe'],
     ['newlife', '🌱', 'New Life', 'Start over from birth'],
+    ['mainmenu', '🏠', 'Main Menu', 'Save and return to the title screen'],
     ['about', 'ℹ️', 'About', 'Life Happens v1.0.0'],
   ];
   for (const [id, emoji, title2, sub] of rows) {
@@ -712,6 +724,7 @@ function renderMenuPanel(body) {
     if (id === 'settings') pushView({ kind: 'settings', title: 'Settings' });
     if (id === 'save') { G.save(); toast('💾 Game saved.'); }
     if (id === 'newlife') confirmModal('Start a new life?', 'Your current life will be saved over. Achievements stay with you.', () => { G.startNewLife({}); showScreen('game'); toast('A brand new life begins.'); confetti('👶'); });
+    if (id === 'mainmenu') { G.save(); closePanel(true); showScreen('title'); }
     if (id === 'about') showAbout();
   });
 }
@@ -728,7 +741,7 @@ function renderStatsPanel(body) {
     ['Relationship', p.relationships.some(r => r.alive && r.relation === 'Spouse') ? 'Married' : p.relationships.some(r => r.alive && r.relation === 'Partner') ? 'Dating' : 'Single'],
     ['Children', p.relationships.filter(r => r.relation === 'Child').length],
   ];
-  body.innerHTML = `<div class="hero-card"><div class="hero-top"><div class="avatar avatar-lg">${avatarSVG(p.avatar)}</div><div class="hero-info"><div class="hero-kicker">Life Stats</div><div class="hero-title">${esc(fullName(p))}</div><div class="hero-sub">${p.age} years old · ${G.countryByCode(p.country).name}</div></div><div class="hero-money"><b>${displayMoney(nw)}</b><span>Net worth</span></div></div></div>
+  body.innerHTML = `<div class="hero-card"><div class="hero-top"><div class="avatar avatar-lg">${avatarSVG(p.avatar, { age: p.age })}</div><div class="hero-info"><div class="hero-kicker">Life Stats</div><div class="hero-title">${esc(fullName(p))}</div><div class="hero-sub">${p.age} years old · ${G.countryByCode(p.country).name}</div></div><div class="hero-money"><b>${displayMoney(nw)}</b><span>Net worth</span></div></div></div>
     <div class="section-label">Details</div>
     <div class="profile-table" style="border-color:#3b4350;background:#252a31">${rows.map(([k, v]) => `<div class="pt-row" style="background:#252a31;border-color:#3b4350"><span style="color:#9aa7b4">${k}</span><b style="color:#fff">${esc(v)}</b></div>`).join('')}</div>
     <div class="section-label">Stats</div>
@@ -860,6 +873,10 @@ function showResultModal(modal) {
             const r = o.action();
             if (r?.toast) toast(r.toast);
             if (r?.result) showResultModal(r.result);
+            if (G.state.player && G.state.screen === 'game') {
+              renderGame();
+              if (panel.type) renderPanelBody();
+            }
           }
         },
       })),
@@ -957,7 +974,7 @@ export function showProfileModal() {
   if (!p) return;
   const nw = G.netWorth(p);
   const partner = p.relationships.find(r => r.alive && ['Partner', 'Spouse'].includes(r.relation));
-  const body = `<div class="modal-avatar-row"><div class="avatar avatar-lg">${avatarSVG(p.avatar)}</div><div class="who"><b>${esc(fullName(p))}</b><span>Age ${p.age} · ${G.countryByCode(p.country).name}</span></div></div>
+  const body = `<div class="modal-avatar-row"><div class="avatar avatar-lg">${avatarSVG(p.avatar, { age: p.age })}</div><div class="who"><b>${esc(fullName(p))}</b><span>Age ${p.age} · ${G.countryByCode(p.country).name}</span></div></div>
     <div class="profile-table">
       <div class="pt-row"><span>Occupation</span><b>${esc(G.occupationLabel(p))}</b></div>
       <div class="pt-row"><span>Education</span><b>${esc(G.educationLabel(p))}</b></div>
@@ -1029,8 +1046,11 @@ function wireTitle() {
     }
   };
   $('#btnContinue').onclick = () => {
-    if (G.load()) { showScreen('game'); toast('Welcome back.'); }
-    else toast('No saved life found.');
+    if (G.load()) {
+      showScreen('game');
+      toast('Welcome back.');
+      if (G.state.player && !G.state.player.alive) setTimeout(showDeathModal, 360);
+    } else toast('No saved life found.');
   };
   $('#btnCreate').onclick = () => { draft = newDraft(); showScreen('create'); };
   $('#btnTitleMenu').onclick = () => showModal({
@@ -1127,11 +1147,5 @@ export function boot() {
   wireGame();
   G.load();
   draft = newDraft();
-  if (G.state.player) {
-    showScreen('game');
-  } else {
-    showScreen('title');
-  }
-  // resume a pending event/death after reload
-  if (G.state.player && !G.state.player.alive) setTimeout(showDeathModal, 400);
+  showScreen('title');
 }
