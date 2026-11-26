@@ -235,6 +235,7 @@ export function openPanel(type, view = null) {
   if (!p) return;
   panel = { type, view };
   $('#panel').classList.remove('hidden');
+  document.body.classList.add('panel-open');
   renderPanelChrome();
   renderPanelBody();
   $('#panelBody').scrollTop = 0;
@@ -243,6 +244,7 @@ export function closePanel(force = false) {
   if (!force && panel.view) { panel.view = null; renderPanelChrome(); renderPanelBody(); return; }
   panel = { type: null, view: null };
   $('#panel').classList.add('hidden');
+  document.body.classList.remove('panel-open');
 }
 function pushView(view) {
   panel.view = view;
@@ -525,7 +527,7 @@ function renderRelationshipsPanel(body) {
     <div class="hero-top">
       <div class="hero-info">
         <div class="hero-kicker">Relationships</div>
-        <div class="hero-title">${active.length} people in your life</div>
+        <div class="hero-title">${plural(active.length, 'person')} in your life</div>
         <div class="hero-sub">${partner ? `Partner: ${esc(partner.firstName)}` : 'Single and ready to mingle'} · ${plural(kids.length, 'child')}</div>
       </div>
       <div class="hero-money"><b>${p.followers ? (p.followers >= 1000 ? (p.followers / 1000).toFixed(1) + 'K' : p.followers) : 0}</b><span>Followers</span></div>
