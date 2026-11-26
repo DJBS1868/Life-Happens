@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#121826">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LifeHappens">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="LifeHappens — a pocket-sized life simulator. Grow up, make choices, and see what happens.">
+  <title>LifeHappens — A Life Simulator</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <span class="ambient-orb orb-a"></span>
+    <span class="ambient-orb orb-b"></span>
+    <span class="ambient-orb orb-c"></span>
+  </div>
+
+  <div class="app-frame" id="app">
+    <svg class="svg-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <symbol id="i-story" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5A2.5 2.5 0 0 1 17.5 21H6.5A2.5 2.5 0 0 1 4 18.5v-13Z"/><path d="M8 7h8M8 11h8M8 15h5"/></symbol>
+      <symbol id="i-activities" viewBox="0 0 24 24"><path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"/><path d="m18.5 15 .9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1Z"/></symbol>
+      <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.8M17.5 14.3A5.5 5.5 0 0 1 21 20"/></symbol>
+      <symbol id="i-assets" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H19a2 2 0 0 1 2 2v10.5a2 2 0 0 1-2 2H5.5A2.5 2.5 0 0 1 3 17V7.5Z"/><path d="M3 9h18M16 13.5h2"/></symbol>
+      <symbol id="i-career" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12h18M10 12v2h4v-2"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></symbol>
+      <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 13v4M8 21h8M9 17h6"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 8a7 7 0 0 1 11.5-1L20 12M4 12l2.4 5a7 7 0 0 0 11.5-1"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+      <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12h18"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M4 19a2 2 0 0 1 2-2h14"/></symbol>
+    </svg>
+
+    <!-- START -->
+    <section class="screen start-screen is-active" id="screen-start">
+      <div class="start-top">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M24 41S7 30.5 7 18.5A9.5 9.5 0 0 1 24 11a9.5 9.5 0 0 1 17 7.5C41 30.5 24 41 24 41Z"/><path class="pulse" d="M11 25h7l3-6 5 12 3-7h8"/></svg>
+        </div>
+        <div class="brand-name">Life<span>Happens</span></div>
+        <button class="round-icon start-settings" id="btn-start-settings" aria-label="How to play">
+          <svg class="icon"><use href="#i-info"/></svg>
+        </button>
+      </div>
+
+      <div class="start-hero">
+        <div class="hero-badge"><span class="dot"></span> A tiny life simulator</div>
+        <h1>Life happens.<br><em>Make it yours.</em></h1>
+        <p>Grow up, fall in love, chase a dream, and live with every choice you make.</p>
+        <div class="orbit" aria-hidden="true">
+          <span class="orbit-card card-age">AGE <b>24</b></span>
+          <span class="orbit-card card-heart"><svg class="icon"><use href="#i-heart"/></svg><b>+1</b></span>
+          <span class="orbit-card card-coin">$</span>
+          <span class="orbit-card card-spark"><svg class="icon"><use href="#i-spark"/></svg></span>
+        </div>
+      </div>
+
+      <div class="start-actions">
+        <button class="btn btn-primary btn-play" id="btn-play" aria-label="Play">
+          <span>Play</span>
+          <small>start a random life</small>
+          <svg class="icon"><use href="#i-chevron"/></svg>
+        </button>
+        <button class="btn btn-secondary" id="btn-create">Create a life</button>
+        <button class="btn btn-ghost" id="btn-continue" hidden>Continue life</button>
+        <div class="start-meta"><svg class="icon"><use href="#i-lock"/></svg> Autosaves on this device. No account needed.</div>
+      </div>
+    </section>
+
+    <!-- CREATE -->
+    <section class="screen create-screen" id="screen-create">
+      <header class="subheader">
+        <button class="round-icon" id="btn-create-back" aria-label="Back">
+          <svg class="icon"><use href="#i-back"/></svg>
+        </button>
+        <div>
+          <div class="subheader-kicker">New life</div>
+          <h2>Create a life</h2>
+        </div>
+        <button class="round-icon" id="btn-randomize" aria-label="Randomize">
+          <svg class="icon"><use href="#i-refresh"/></svg>
+        </button>
+      </header>
+
+      <div class="create-body">
+        <div class="avatar-stage">
+          <div class="avatar-halo"></div>
+          <div class="create-avatar" id="create-avatar">🧑</div>
+          <div class="avatar-caption" id="avatar-caption">A brand-new human</div>
+        </div>
+
+        <div class="form-grid">
+          <label class="field">
+            <span>First name</span>
+            <input id="input-first" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="First name">
+          </label>
+          <label class="field">
+            <span>Last name</span>
+            <input id="input-last" type="text" maxlength="18" autocomplete="off" spellcheck="false" placeholder="Last name">
+          </label>
+        </div>
+
+        <div class="field">
+          <span>Gender</span>
+          <div class="segmented" id="gender-picker" role="group" aria-label="Gender">
+            <button type="button" data-gender="Female">Female</button>
+            <button type="button" data-gender="Male">Male</button>
+            <button type="button" data-gender="Non-binary">Non-binary</button>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Country</span>
+          <div class="select-wrap">
+            <select id="select-country"></select>
+            <svg class="icon"><use href="#i-chevron"/></svg>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Hometown</span>
+          <div class="select-wrap">
+            <select id="select-city"></select>
+            <svg class="icon"><use href="#i-chevron"/></svg>
+          </div>
+        </label>
+
+        <div class="create-note">
+          <svg class="icon"><use href="#i-info"/></svg>
+          <span>Your family, stats, and first chapter are generated when you begin. Every life is different.</span>
+        </div>
+      </div>
+
+      <div class="create-footer">
+        <button class="btn btn-primary" id="btn-begin">Begin Life</button>
+        <button class="btn btn-text" id="btn-quick-begin">Surprise me</button>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section class="screen game-screen" id="screen-game">
+      <header class="game-header" id="game-header">
+        <div class="identity-row">
+          <button class="avatar-btn" id="btn-avatar" aria-label="Your profile">
+            <span id="header-avatar">🧑</span>
+            <i class="avatar-dot" id="avatar-dot"></i>
+          </button>
+          <div class="identity">
+            <div class="identity-name" id="header-name">—</div>
+            <div class="identity-meta" id="header-meta">Age 0 · Baby</div>
+          </div>
+          <button class="money-pill" id="btn-money" aria-label="Your money">
+            <span id="header-money">$0</span>
+            <small id="header-income">no income</small>
+          </button>
+          <button class="round-icon header-settings" id="btn-settings" aria-label="Settings">
+            <svg class="icon"><use href="#i-gear"/></svg>
+          </button>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+      </header>
+
+      <main class="screen-body" id="tab-body" aria-live="polite"></main>
+
+      <div class="age-dock" id="age-dock">
+        <button class="age-btn" id="age-btn">
+          <span class="age-btn-icon"><svg class="icon"><use href="#i-arrow-up"/></svg></span>
+          <span class="age-btn-text"><b id="age-btn-title">Age up</b><small id="age-btn-sub">Turn 1</small></span>
+          <span class="age-btn-plus">+1</span>
+        </button>
+      </div>
+
+      <nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
+        <button data-tab="life" class="is-active" aria-label="Life story">
+          <svg class="icon"><use href="#i-story"/></svg><span>Life</span>
+        </button>
+        <button data-tab="activities" aria-label="Activities">
+          <svg class="icon"><use href="#i-activities"/></svg><span>Activities</span>
+        </button>
+        <button data-tab="people" aria-label="Relationships">
+          <svg class="icon"><use href="#i-people"/></svg><span>People</span>
+        </button>
+        <button data-tab="assets" aria-label="Assets">
+          <svg class="icon"><use href="#i-assets"/></svg><span>Assets</span>
+        </button>
+        <button data-tab="career" aria-label="Career and education">
+          <svg class="icon"><use href="#i-career"/></svg><span>Career</span>
+        </button>
+      </nav>
+    </section>
+
+    <!-- DEATH -->
+    <section class="screen death-screen" id="screen-death"></section>
+
+    <div class="modal-root" id="modal-root"></div>
+    <div class="toast-root" id="toast-root" aria-live="assertive"></div>
+    <div class="confetti-root" id="confetti-root" aria-hidden="true"></div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
