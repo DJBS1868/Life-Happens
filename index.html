@@ -238,12 +238,21 @@
 
   <!-- ================= PANEL ================= -->
   <section id="panel" class="panel hidden" aria-modal="true" role="dialog">
+    <div class="panel-idbar">
+      <div class="panel-avatar" id="panelAvatar"></div>
+      <div class="panel-id">
+        <div class="panel-id-name" id="panelName">—</div>
+        <div class="panel-id-occ" id="panelOcc">—</div>
+      </div>
+      <div class="panel-bank">
+        <b id="panelMoney">$0</b>
+        <span>Bank Balance</span>
+      </div>
+    </div>
     <header class="panel-head">
-      <button class="panel-back" id="panelBack" aria-label="Close">
-        <svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
+      <button class="panel-back" id="panelBack" aria-label="Close"></button>
       <div class="panel-title" id="panelTitle">Job</div>
-      <button class="panel-money" id="panelMoney">$0</button>
+      <span class="panel-head-spacer" aria-hidden="true"></span>
     </header>
     <div class="panel-body" id="panelBody"></div>
   </section>
