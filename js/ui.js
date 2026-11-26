@@ -235,19 +235,35 @@ export function openPanel(type, view = null) {
   if (!p) return;
   panel = { type, view };
   $('#panel').classList.remove('hidden');
-  $('#panelMoney').textContent = displayMoney(p.money);
+  renderPanelChrome();
   renderPanelBody();
   $('#panelBody').scrollTop = 0;
 }
 export function closePanel(force = false) {
-  if (!force && panel.view) { panel.view = null; renderPanelBody(); return; }
+  if (!force && panel.view) { panel.view = null; renderPanelChrome(); renderPanelBody(); return; }
   panel = { type: null, view: null };
   $('#panel').classList.add('hidden');
 }
 function pushView(view) {
   panel.view = view;
   $('#panelBody').scrollTop = 0;
+  renderPanelChrome();
   renderPanelBody();
+}
+const PANEL_CLOSE_ICON = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+const PANEL_BACK_ICON = '<svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function renderPanelChrome() {
+  const p = G.state.player;
+  if (!p) return;
+  $('#panelAvatar').innerHTML = avatarSVG(p.avatar, { age: p.age });
+  $('#panelName').textContent = fullName(p);
+  $('#panelOcc').textContent = G.occupationLabel(p);
+  const moneyEl = $('#panelMoney');
+  moneyEl.textContent = displayMoney(p.money);
+  moneyEl.classList.toggle('debt', p.money < 0);
+  const back = $('#panelBack');
+  back.innerHTML = panel.view ? PANEL_BACK_ICON : PANEL_CLOSE_ICON;
+  back.setAttribute('aria-label', panel.view ? 'Back' : 'Close');
 }
 function panelTitleFor() {
   if (panel.view?.title) return panel.view.title;
@@ -257,8 +273,8 @@ function panelTitleFor() {
 function renderPanelBody() {
   const p = G.state.player;
   if (!p) return;
+  renderPanelChrome();
   $('#panelTitle').textContent = panelTitleFor();
-  $('#panelMoney').textContent = displayMoney(p.money);
   const body = $('#panelBody');
   if (panel.view) { renderPanelView(body); return; }
   switch (panel.type) {
@@ -293,7 +309,7 @@ function renderJobPanel(body) {
     const perf = Math.round(p.job.performance || 0);
     html += `<div class="hero-card">
       <div class="hero-top">
-        <div class="row-emoji" style="width:52px;height:52px;font-size:26px;background:#101820">${p.job.icon || '💼'}</div>
+        <div class="row-emoji" style="width:52px;height:52px;font-size:26px">${p.job.icon || '💼'}</div>
         <div class="hero-info">
           <div class="hero-kicker">Currently employed</div>
           <div class="hero-title">${esc(p.job.title)}</div>
@@ -305,12 +321,12 @@ function renderJobPanel(body) {
       <div class="mini-label"><span>Performance</span><span>${perf}%</span></div>
     </div>
     <div class="section-label">Work</div>
-    <div class="action-grid">
-      <button class="action-tile" data-jobact="work"><span class="tile-emoji">💪</span><span class="tile-name">Work Harder</span><span class="tile-sub">Boost performance</span></button>
-      <button class="action-tile" data-jobact="raise"><span class="tile-emoji">💰</span><span class="tile-name">Ask for a Raise</span><span class="tile-sub">More money</span></button>
-      <button class="action-tile" data-jobact="promote"><span class="tile-emoji">📈</span><span class="tile-name">Ask for Promotion</span><span class="tile-sub">Needs 68% performance</span></button>
-      <button class="action-tile" data-jobact="quit"><span class="tile-emoji">🚪</span><span class="tile-name">Quit Job</span><span class="tile-sub">Walk away</span></button>
-      ${p.age >= 55 ? `<button class="action-tile" data-jobact="retire"><span class="tile-emoji">🌴</span><span class="tile-name">Retire</span><span class="tile-sub">Start the easy life</span></button>` : ''}
+    <div class="menu-list">
+      <button class="list-row" data-jobact="work"><span class="row-emoji">💪</span><span class="row-main"><span class="row-title">Work Harder</span><span class="row-sub">Boost your performance</span></span><span class="row-chev">›</span></button>
+      <button class="list-row" data-jobact="raise"><span class="row-emoji">💰</span><span class="row-main"><span class="row-title">Ask for a Raise</span><span class="row-sub">Try for more money</span></span><span class="row-chev">›</span></button>
+      <button class="list-row" data-jobact="promote"><span class="row-emoji">📈</span><span class="row-main"><span class="row-title">Ask for Promotion</span><span class="row-sub">Needs 68% performance</span></span><span class="row-chev">›</span></button>
+      <button class="list-row" data-jobact="quit"><span class="row-emoji">🚪</span><span class="row-main"><span class="row-title">Quit Job</span><span class="row-sub">Walk away</span></span><span class="row-chev">›</span></button>
+      ${p.age >= 55 ? `<button class="list-row" data-jobact="retire"><span class="row-emoji">🌴</span><span class="row-main"><span class="row-title">Retire</span><span class="row-sub">Start the easy life</span></span><span class="row-chev">›</span></button>` : ''}
     </div>`;
   } else {
     html += `<div class="empty-card"><span class="big">${p.retired ? '🌴' : '💼'}</span><b>${p.retired ? 'Retired' : 'Unemployed'}</b>${p.retired ? 'You are enjoying the quiet life.' : 'Find a job below to start earning money.'}</div>`;
@@ -399,7 +415,7 @@ function renderAssetsPanel(body) {
     <div class="hero-top">
       <div class="hero-info">
         <div class="hero-kicker">Net worth</div>
-        <div class="hero-title" style="font-size:24px;color:#fff">${displayMoney(nw)}</div>
+        <div class="hero-title">${displayMoney(nw)}</div>
         <div class="hero-sub">${plural(assets.length, 'asset')} · ${displayMoney(p.money)} in the bank</div>
       </div>
       <div class="hero-money"><b style="color:${p.debt ? '#ff7b7b' : '#4ade4f'}">${p.debt ? '-' + displayMoney(p.debt) : displayMoney(p.money)}</b><span>${p.debt ? 'Debt' : 'Available'}</span></div>
@@ -425,12 +441,12 @@ function renderAssetsPanel(body) {
   }
 
   html += `<div class="section-label">Go Shopping</div>
-    <div class="action-grid">
+    <div class="menu-list">
       ${['Vehicle', 'Property', 'Luxury', 'Tech'].map(t => {
         const icons = { Vehicle: '🚗', Property: '🏠', Luxury: '💎', Tech: '📱' };
         const names = { Vehicle: 'Vehicles', Property: 'Properties', Luxury: 'Luxury', Tech: 'Tech' };
         const browse = { Vehicle: 'Browse vehicles', Property: 'Browse properties', Luxury: 'Browse luxury items', Tech: 'Browse tech' };
-        return `<button class="action-tile" data-shop="${t}"><span class="tile-emoji">${icons[t]}</span><span class="tile-name">${names[t]}</span><span class="tile-sub">${browse[t]}</span></button>`;
+        return `<button class="list-row" data-shop="${t}"><span class="row-emoji">${icons[t]}</span><span class="row-main"><span class="row-title">${names[t]}</span><span class="row-sub">${browse[t]}</span></span><span class="row-chev">›</span></button>`;
       }).join('')}
     </div>`;
   body.innerHTML = html;
@@ -514,7 +530,7 @@ function renderRelationshipsPanel(body) {
       </div>
       <div class="hero-money"><b>${p.followers ? (p.followers >= 1000 ? (p.followers / 1000).toFixed(1) + 'K' : p.followers) : 0}</b><span>Followers</span></div>
     </div>
-    ${!partner ? `<button class="btn btn-sm" style="margin-top:10px;position:relative;z-index:1" data-findlove>💘 Find Love</button>` : ''}
+    ${!partner ? `<button class="panel-cta" data-findlove>💘 Find Love</button>` : ''}
   </div>`;
 
   const renderGroup = (title, types) => {
@@ -527,11 +543,10 @@ function renderRelationshipsPanel(body) {
       s += `<button class="person-row" data-person="${r.id}">
         ${r.pet ? `<div class="avatar avatar-md pet-avatar">${petEmoji(r)}</div>` : avatarHTML(r.avatar, 'avatar-md', r.age)}
         <span class="person-main">
-          <span class="person-name">${esc(G.personName(r))} <span class="age">${r.pet ? 'pet' : r.age}</span> ${r.alive ? '' : '<span class="relation-heart" style="color:#8b96a3">🪦</span>'}</span>
-          <span class="person-rel">${r.relation}${r.alive ? '' : ' · deceased'}</span>
-          ${r.alive ? `<span class="bond"><span class="bond-track"><i style="width:${r.bond}%"></i></span><span class="bond-val">${Math.round(r.bond)}%</span></span>` : ''}
+          <span class="person-name">${esc(G.personName(r))} <span class="person-rel">(${r.relation})</span> ${r.alive ? '' : '<span class="relation-heart" style="color:#8b96a3">🪦</span>'}</span>
+          ${r.alive ? `<span class="bond"><span class="bond-label">Relationship</span><span class="bond-val">${Math.round(r.bond)}%</span><span class="bond-track"><i style="width:${r.bond}%"></i></span></span>` : `<span class="person-rel deceased">Deceased</span>`}
         </span>
-        <span class="more-dots">⋯</span>
+        <span class="more-dots">›</span>
       </button>`;
     }
     return s;
@@ -635,18 +650,14 @@ function gift(r, kind) {
 // ---------------------------------------------------------------------------
 function renderActivitiesPanel(body) {
   const p = G.state.player;
-  let html = `<div class="hero-card">
-    <div class="hero-top">
-      <div class="hero-info">
-        <div class="hero-kicker">Free time</div>
-        <div class="hero-title">What do you want to do?</div>
-        <div class="hero-sub">${p.prison > 0 ? 'You are in prison. Most activities are unavailable.' : 'Every choice changes your story.'}</div>
-      </div>
-    </div>
-  </div><div class="section-label">Categories</div><div class="action-grid">`;
+  let html = '';
+  if (p.prison > 0) {
+    html += `<div class="panel-note">⛓️ You are in prison. Most activities are unavailable.</div>`;
+  }
+  html += `<div class="menu-list">`;
   for (const c of ACTIVITY_CATEGORIES) {
-    html += `<button class="action-tile" data-cat="${c.id}" ${p.prison > 0 ? 'disabled' : ''}>
-      <span class="tile-emoji">${c.icon}</span><span class="tile-name">${c.name}</span><span class="tile-sub">${c.desc}</span>
+    html += `<button class="list-row" data-cat="${c.id}" ${p.prison > 0 ? 'disabled' : ''}>
+      <span class="row-emoji">${c.icon}</span><span class="row-main"><span class="row-title">${c.name}</span><span class="row-sub">${c.desc}</span></span><span class="row-chev">›</span>
     </button>`;
   }
   html += `</div>`;
@@ -658,17 +669,18 @@ function renderCategory(body, id) {
   const p = G.state.player;
   const cat = ACTIVITY_CATEGORIES.find(c => c.id === id);
   if (!cat) { body.innerHTML = '<div class="empty-card">Category not found.</div>'; return; }
-  let html = `<div class="hero-card" style="padding:12px 14px"><div class="hero-top"><div class="row-emoji" style="width:46px;height:46px;font-size:24px">${cat.icon}</div><div class="hero-info"><div class="hero-kicker">${cat.name}</div><div class="hero-title" style="font-size:16px">${cat.desc}</div></div><div class="hero-money"><b>${displayMoney(p.money)}</b><span>Bank</span></div></div></div>`;
-  html += `<div class="section-label">Choose an activity</div>`;
+  let html = `<div class="section-label">Choose an Activity</div>`;
+  html += `<div class="menu-list">`;
   for (const a of cat.actions) {
     const locked = (a.minAge && p.age < a.minAge) || (a.cost && p.money < a.cost);
     const sub = [a.sub, a.minAge && p.age < a.minAge ? `Age ${a.minAge}+` : '', a.cost && p.money < a.cost ? 'Not enough money' : ''].filter(Boolean).join(' · ');
-    html += `<button class="list-row" data-act="${a.id}" ${locked ? 'style="opacity:.62"' : ''}>
+    html += `<button class="list-row ${locked ? 'locked' : ''}" data-act="${a.id}">
       <span class="row-emoji">${a.icon}</span>
       <span class="row-main"><span class="row-title">${a.name}</span><span class="row-sub">${esc(sub)}</span></span>
       <span class="row-right ${locked ? 'red' : ''}">${a.cost ? money(a.cost) : 'Free'}<span class="tiny-sub">${locked ? 'Locked' : 'Do it'}</span></span>
     </button>`;
   }
+  html += `</div>`;
   body.innerHTML = html;
   $$('[data-act]', body).forEach(b => b.onclick = () => {
     const a = ACTIVITY_ACTIONS[b.dataset.act];
@@ -690,32 +702,22 @@ function runActivity(id) {
 // ---------------------------------------------------------------------------
 function renderMenuPanel(body) {
   const p = G.state.player;
-  const nw = G.netWorth(p);
   const title = p.age >= 65 ? 'Retired Legend' : p.age >= 30 ? 'Certified Bitizen' : 'Rising Star';
-  let html = `<div class="hero-card">
-    <div class="hero-top">
-      <div class="avatar avatar-lg">${avatarSVG(p.avatar, { age: p.age })}</div>
-      <div class="hero-info">
-        <div class="hero-kicker">${esc(title)}</div>
-        <div class="hero-title">${esc(fullName(p))}</div>
-        <div class="hero-sub">Age ${p.age} · ${G.countryByCode(p.country).name}</div>
-      </div>
-      <div class="hero-money"><b>${displayMoney(nw)}</b><span>Net worth</span></div>
-    </div>
-  </div>
-  <div class="section-label">Life</div>`;
-  const rows = [
-    ['stats', '📊', 'Life Stats', 'Age, education, money and more'],
-    ['achievements', '🏆', 'Achievements', `${Object.keys(G.state.achievements).length} of ${ACHIEVEMENTS.length} unlocked`],
-    ['settings', '⚙️', 'Settings', 'Sound, haptics and saved data'],
-    ['save', '💾', 'Save Game', 'Keep your life safe'],
-    ['newlife', '🌱', 'New Life', 'Start over from birth'],
-    ['mainmenu', '🏠', 'Main Menu', 'Save and return to the title screen'],
-    ['about', 'ℹ️', 'About', 'Life Happens v1.0.0'],
-  ];
-  for (const [id, emoji, title2, sub] of rows) {
-    html += `<button class="list-row" data-menu="${id}"><span class="row-emoji">${emoji}</span><span class="row-main"><span class="row-title">${title2}</span><span class="row-sub">${sub}</span></span><span class="row-chev">›</span></button>`;
-  }
+  const row = (id, emoji, label, sub) => `<button class="list-row" data-menu="${id}"><span class="row-emoji">${emoji}</span><span class="row-main"><span class="row-title">${label}</span><span class="row-sub">${sub}</span></span><span class="row-chev">›</span></button>`;
+  let html = `<div class="panel-note">${esc(title)} · Age ${p.age}</div>`;
+  html += `<div class="section-label">Life</div><div class="menu-list">
+    ${row('stats', '📊', 'Life Stats', 'Age, education, money and more')}
+    ${row('achievements', '🏆', 'Achievements', `${Object.keys(G.state.achievements).length} of ${ACHIEVEMENTS.length} unlocked`)}
+  </div>`;
+  html += `<div class="section-label">Game</div><div class="menu-list">
+    ${row('settings', '⚙️', 'Settings', 'Sound, haptics and saved data')}
+    ${row('save', '💾', 'Save Game', 'Keep your life safe')}
+    ${row('newlife', '🌱', 'New Life', 'Start over from birth')}
+    ${row('mainmenu', '🏠', 'Main Menu', 'Save and return to the title screen')}
+  </div>`;
+  html += `<div class="section-label">Info</div><div class="menu-list">
+    ${row('about', 'ℹ️', 'About', 'Life Happens v1.0.0')}
+  </div>`;
   body.innerHTML = html;
   $$('[data-menu]', body).forEach(b => b.onclick = () => {
     const id = b.dataset.menu;
@@ -741,33 +743,36 @@ function renderStatsPanel(body) {
     ['Relationship', p.relationships.some(r => r.alive && r.relation === 'Spouse') ? 'Married' : p.relationships.some(r => r.alive && r.relation === 'Partner') ? 'Dating' : 'Single'],
     ['Children', p.relationships.filter(r => r.relation === 'Child').length],
   ];
-  body.innerHTML = `<div class="hero-card"><div class="hero-top"><div class="avatar avatar-lg">${avatarSVG(p.avatar, { age: p.age })}</div><div class="hero-info"><div class="hero-kicker">Life Stats</div><div class="hero-title">${esc(fullName(p))}</div><div class="hero-sub">${p.age} years old · ${G.countryByCode(p.country).name}</div></div><div class="hero-money"><b>${displayMoney(nw)}</b><span>Net worth</span></div></div></div>
-    <div class="section-label">Details</div>
-    <div class="profile-table" style="border-color:#3b4350;background:#252a31">${rows.map(([k, v]) => `<div class="pt-row" style="background:#252a31;border-color:#3b4350"><span style="color:#9aa7b4">${k}</span><b style="color:#fff">${esc(v)}</b></div>`).join('')}</div>
+  body.innerHTML = `<div class="section-label">Details</div>
+    <div class="profile-table panel-table">${rows.map(([k, v]) => `<div class="pt-row"><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
     <div class="section-label">Stats</div>
-    ${Object.entries(p.stats).map(([k, v]) => `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#c8d2dc;margin-bottom:4px"><span style="text-transform:capitalize">${k}</span><span>${v}%</span></div><div class="mini-bar"><i style="width:${v}%;background:${v < 30 ? '#ff5b4e' : v < 55 ? '#ffb02e' : 'linear-gradient(90deg,#2fcfc1,#1da89c)'}"></i></div></div>`).join('')}`;
+    <div class="panel-stats">${Object.entries(p.stats).map(([k, v]) => `<div class="panel-stat"><div class="panel-stat-top"><span>${k}</span><b>${v}%</b></div><div class="mini-bar ${v < 30 ? 'low' : v < 55 ? 'warm' : ''}"><i style="width:${v}%"></i></div></div>`).join('')}</div>`;
 }
 
 function renderAchievementsPanel(body) {
   const unlocked = G.state.achievements;
-  let html = `<div class="hero-card"><div class="hero-top"><div class="row-emoji" style="width:52px;height:52px;font-size:26px;background:#3a2f12">🏆</div><div class="hero-info"><div class="hero-kicker">Trophy case</div><div class="hero-title">${Object.keys(unlocked).length} / ${ACHIEVEMENTS.length} unlocked</div><div class="hero-sub">Keep living to collect them all.</div></div></div></div>`;
-  html += `<div class="section-label">Achievements</div>`;
+  let html = `<div class="section-label">Achievements <span class="lbl-right">${Object.keys(unlocked).length} / ${ACHIEVEMENTS.length}</span></div><div class="menu-list">`;
   for (const a of ACHIEVEMENTS) {
     const got = !!unlocked[a.id];
-    html += `<div class="list-row" style="opacity:${got ? 1 : .55}"><span class="row-emoji">${got ? a.icon : '🔒'}</span><span class="row-main"><span class="row-title">${a.name}</span><span class="row-sub">${a.desc}</span></span><span class="row-right ${got ? 'green' : ''}">${got ? '✓' : ''}</span></div>`;
+    html += `<div class="list-row achievement ${got ? '' : 'locked'}"><span class="row-emoji">${got ? a.icon : '🔒'}</span><span class="row-main"><span class="row-title">${a.name}</span><span class="row-sub">${a.desc}</span></span><span class="row-right ${got ? 'green' : ''}">${got ? '✓' : ''}</span></div>`;
   }
+  html += `</div>`;
   body.innerHTML = html;
 }
 
 function renderSettingsPanel(body) {
   const s = G.state.settings;
   body.innerHTML = `<div class="section-label">Preferences</div>
+    <div class="menu-list">
     <button class="list-row" data-toggle="sound"><span class="row-emoji">🔊</span><span class="row-main"><span class="row-title">Sound effects</span><span class="row-sub">Taps and little blips</span></span><span class="row-right ${s.sound ? 'green' : ''}">${s.sound ? 'ON' : 'OFF'}</span></button>
     <button class="list-row" data-toggle="haptics"><span class="row-emoji">📳</span><span class="row-main"><span class="row-title">Haptics</span><span class="row-sub">Vibrate on touch (mobile)</span></span><span class="row-right ${s.haptics ? 'green' : ''}">${s.haptics ? 'ON' : 'OFF'}</span></button>
+    </div>
     <div class="section-label">Data</div>
+    <div class="menu-list">
     <button class="list-row" data-settings-action="save"><span class="row-emoji">💾</span><span class="row-main"><span class="row-title">Save now</span><span class="row-sub">Write your life to this device</span></span><span class="row-right green">Save</span></button>
     <button class="list-row" data-settings-action="erase"><span class="row-emoji">🗑️</span><span class="row-main"><span class="row-title">Erase all data</span><span class="row-sub">Delete your save and achievements</span></span><span class="row-right red">Erase</span></button>
-    <p class="modal-note" style="margin-top:16px;color:#6f7b88">Life Happens v1.0.0 · Made for mobile</p>`;
+    </div>
+    <p class="panel-note">Life Happens v1.0.0 · Made for mobile</p>`;
   $$('[data-toggle]', body).forEach(b => b.onclick = () => {
     const k = b.dataset.toggle;
     G.state.settings[k] = !G.state.settings[k];
