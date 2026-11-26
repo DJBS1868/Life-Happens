@@ -1317,7 +1317,7 @@
 .toast-root {
   position: fixed;
   left: 50%;
-  bottom: calc(132px + var(--safe-bottom));
+  top: calc(var(--safe-top) + 64px);
   z-index: 140;
   transform: translateX(-50%);
   display: flex;
@@ -1339,7 +1339,7 @@
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(-10px);
   transition: opacity 0.22s ease, transform 0.22s ease;
 }
 .toast.show { opacity: 1; transform: translateY(0); }

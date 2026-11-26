@@ -88,6 +88,8 @@ export function applyForJob(jobId) {
       field: job.field,
       category: job.category
     };
+    p.retired = false;
+    p.pension = 0;
     p.jobHistory.push({ id: job.id, title: job.title, company: job.company, salary: job.salary, age: p.age });
     p.stats.happiness = clamp(p.stats.happiness + 5);
     log(p, `I was hired as a ${job.title} at ${job.company}.`, "positive");
@@ -283,8 +285,8 @@ export function relationshipAction(relId, action) {
     p.flags.married = true;
     p.flags.marriages = (p.flags.marriages || 0) + 1;
     p.stats.happiness = clamp(p.stats.happiness + 15);
-    message = `${rel.firstName} said yes! We're engaged.`;
-    log(p, `I proposed to ${rel.firstName}, and they said yes!`, "milestone");
+    message = `${rel.firstName} said yes! We're married.`;
+    log(p, `I proposed to ${rel.firstName}, and we got married!`, "milestone");
   } else if (action === "breakup") {
     if (!["partner", "spouse"].includes(rel.type)) return { ok: false, message: "You're not in a relationship with them." };
     const wasSpouse = rel.type === "spouse";
@@ -302,6 +304,7 @@ export function relationshipAction(relId, action) {
       const child = addChild();
       message = `We welcomed a baby ${child.gender === "female" ? "girl" : "boy"}, ${child.firstName}.`;
       p.stats.happiness = clamp(p.stats.happiness + 8);
+      log(p, message, "milestone");
     } else {
       message = "We're trying for a baby. Maybe next year.";
       log(p, message, "neutral");
@@ -313,6 +316,7 @@ export function relationshipAction(relId, action) {
     const child = addChild({ adopted: true });
     message = `We adopted a child, ${child.firstName}.`;
     p.stats.happiness = clamp(p.stats.happiness + 10);
+    log(p, message, "milestone");
   } else if (action === "play") {
     rel.closeness = clamp(rel.closeness + 8);
     p.stats.happiness = clamp(p.stats.happiness + 3);

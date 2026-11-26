@@ -1,6 +1,6 @@
 import {
   store, clamp, randomInt, fmtMoney, log, save, applyEffects, addPartner,
-  addChild, addPet, addFriend, addGrandchild, removeRelationship, takeQueue, pushQueue
+  addChild, addPet, addFriend, addGrandchild, removeRelationship, takeQueue
 } from "./engine.js";
 import { ACTIVITY_MAP } from "./activities.js";
 import { die, retirePerson } from "./lifecycle.js";
@@ -217,13 +217,14 @@ export function resolveEvent(event, choiceIndex) {
       p.flags.married = true;
       p.flags.marriages = (p.flags.marriages || 0) + 1;
       p.stats.happiness = clamp(p.stats.happiness + 10);
-      message = `${rel.firstName} said yes! We're engaged.`;
+      message = `${rel.firstName} said yes! We're married.`;
     }
   } else if (action === "pet") {
     const pet = addPet();
     message = `I adopted a ${pet.species} named ${pet.firstName}.`;
   } else if (action === "grandchild") {
-    addGrandchild();
+    const gc = addGrandchild();
+    if (gc) message = `${message} ${gc.firstName} was born.`;
   } else if (action === "license") {
     if (Math.random() < 0.7) {
       p.flags.license = true;

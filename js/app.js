@@ -87,6 +87,8 @@ function toast(message, tone = "neutral") {
   const el = document.createElement("div");
   el.className = `toast ${tone}`;
   el.textContent = message;
+  const existing = root.querySelectorAll(".toast");
+  if (existing.length >= 3) existing[0].remove();
   root.appendChild(el);
   requestAnimationFrame(() => el.classList.add("show"));
   setTimeout(() => {

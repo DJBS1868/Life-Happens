@@ -225,7 +225,7 @@ export function netWorth(p) {
 export function computeFinances(p) {
   let income = 0;
   if (p.job && p.inPrison === 0) income = p.job.salary;
-  if (p.retired && p.pension) income = p.pension;
+  else if (p.retired && p.pension) income = p.pension;
   let expenses = 0;
   if (p.age >= 18) expenses += 9000;
   const kids = (p.relationships || []).filter(r => r.type === "child" && r.alive !== false).length;
@@ -456,7 +456,6 @@ export function addPartner({ age, gender, name, closeness = 72 } = {}) {
   });
   rel.metAt = p.age;
   p.relationships.push(rel);
-  log(p, `I started dating ${rel.firstName}, who is ${rel.age}.`, "positive");
   p.stats.happiness = clamp(p.stats.happiness + 5);
   return rel;
 }
@@ -472,7 +471,6 @@ export function addFriend({ age, gender } = {}) {
   });
   rel.metAt = p.age;
   p.relationships.push(rel);
-  log(p, `I became friends with ${rel.firstName}.`, "positive");
   return rel;
 }
 
@@ -491,9 +489,6 @@ export function addChild({ adopted = false } = {}) {
   child.adopted = adopted;
   p.relationships.push(child);
   p.flags.parent = true;
-  log(p, adopted
-    ? `I adopted a ${child.gender === "female" ? "daughter" : "son"}, ${child.firstName}, age ${child.age}.`
-    : `My ${child.gender === "female" ? "daughter" : "son"}, ${child.firstName}, was born.`, "milestone");
   p.stats.happiness = clamp(p.stats.happiness + 10);
   return child;
 }
@@ -514,7 +509,6 @@ export function addPet({ species } = {}) {
   });
   pet.metAt = p.age;
   p.relationships.push(pet);
-  log(p, `I adopted a ${sp} named ${pet.firstName}.`, "positive");
   return pet;
 }
 
@@ -532,7 +526,6 @@ export function addGrandchild() {
   });
   gc.metAt = p.age;
   p.relationships.push(gc);
-  log(p, `My grandchild ${gc.firstName} was born.`, "milestone");
   return gc;
 }
 

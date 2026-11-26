@@ -1,6 +1,6 @@
 import {
   store, clamp, randomInt, currentYear, log, save, netWorth,
-  archiveCurrent, addChild, addGrandchild, getCountry
+  archiveCurrent
 } from "./engine.js";
 import { EVENTS } from "./events.js";
 import { FLAVOR, CONDITIONAL_FLAVOR } from "./flavor.js";
@@ -197,7 +197,7 @@ function applyFinances(p, notes) {
 function computeFinancesLocal(p) {
   let income = 0;
   if (p.job && p.inPrison === 0) income = p.job.salary;
-  if (p.retired && p.pension) income = p.pension;
+  else if (p.retired && p.pension) income = p.pension;
   let expenses = 0;
   if (p.age >= 18) expenses += 9000;
   const kids = p.relationships.filter(r => r.type === "child" && r.alive !== false).length;
@@ -246,8 +246,11 @@ function checkDeath(p) {
   let risk = 0;
   if (p.age >= 60) risk += (p.age - 60) * 0.0045;
   if (p.age >= 85) risk += (p.age - 85) * 0.02;
-  risk += Math.max(0, 100 - p.stats.health) * 0.0028;
-  if (p.inPrison > 0) risk += 0.01;
+  // Health only becomes life-threatening when it is genuinely low, and young
+  // characters are more resilient so most lives reach adulthood.
+  if (p.age >= 18) risk += Math.max(0, 50 - p.stats.health) * 0.0016;
+  else risk += Math.max(0, 25 - p.stats.health) * 0.0012;
+  if (p.inPrison > 0) risk += 0.006;
   if (Math.random() >= risk) return null;
   const causesOld = ["old age", "heart failure", "a stroke", "pneumonia", "natural causes"];
   const causesUnwell = ["heart disease", "cancer", "a long illness", "complications from an infection"];
