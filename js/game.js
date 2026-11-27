@@ -197,13 +197,38 @@ export function save() {
     return true;
   } catch { return false; }
 }
+function normalizePlayer(p) {
+  if (!p || typeof p !== 'object') return null;
+  p.stats = { happiness: 70, health: 80, smarts: 50, looks: 50, ...(p.stats || {}) };
+  p.assets = Array.isArray(p.assets) ? p.assets : [];
+  p.relationships = Array.isArray(p.relationships) ? p.relationships : [];
+  p.log = Array.isArray(p.log) ? p.log : [];
+  p.jobHistory = Array.isArray(p.jobHistory) ? p.jobHistory : [];
+  p.seenEvents = Array.isArray(p.seenEvents) ? p.seenEvents : [];
+  p.avatar = p.avatar || randomAvatar(p.gender || 'female');
+  p.followers ??= 0;
+  p.vacations ??= 0;
+  p.debt ??= 0;
+  p.prison ??= 0;
+  p.money ??= 0;
+  p.age ??= 0;
+  p.alive = p.alive !== false;
+  p.education ||= 'none';
+  p.prayerAge ??= -1;
+  p.lastIncome ??= 0;
+  p.lastExpenses ??= 0;
+  p.retired = !!p.retired;
+  p.trade = !!p.trade;
+  p.beenToPrison = !!p.beenToPrison;
+  return p;
+}
 export function load() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
     const data = JSON.parse(raw);
     if (!data || !data.player) return false;
-    state.player = data.player;
+    state.player = normalizePlayer(data.player);
     state.settings = { sound: true, haptics: true, ...(data.settings || {}) };
     state.achievements = data.achievements || {};
     state.challengeClaimed = !!data.challengeClaimed;
@@ -928,7 +953,7 @@ export function doActivity(id) {
     case 'casino': {
       pay();
       if (chance(.48)) {
-        const win = meta.cost;
+        const win = meta.cost * 2;
         changeMoney(win);
         bump('happiness', 8);
         out.modal = { title: 'Big Win', body: `<p>The cards fell your way. You doubled your money and walked away with <b>${moneyFull(win)}</b>.</p>` };
@@ -972,8 +997,8 @@ export function doActivity(id) {
       break;
     }
     case 'date': {
-      if (p.age < 18) return { ok: false, message: 'You must be 18 to date.' };
-      const partner = makePerson({ age: Math.max(18, p.age + randInt(-4, 4)), relation: 'Partner', lastName: randomLastName(), bond: randInt(45, 65) });
+      if (p.age < 16) return { ok: false, message: 'You must be 16 to date.' };
+      const partner = makePerson({ age: Math.max(16, p.age + randInt(-2, 4)), relation: 'Partner', lastName: randomLastName(), bond: randInt(45, 65) });
       out.modal = {
         title: 'Love Interest',
         body: `<div class="modal-avatar-row"><div class="avatar avatar-lg">${avatarSVG(partner.avatar, { age: partner.age })}</div><div class="who"><b>${partner.firstName} ${partner.lastName}</b><span>${partner.age} · ${partner.gender === 'female' ? 'Woman' : 'Man'} · ${rand(['Kind', 'Funny', 'Ambitious', 'Adventurous', 'Mysterious'])}</span></div></div><p>You matched with someone interesting. Want to ask them out?</p>`,
@@ -1377,7 +1402,7 @@ export function relationshipAction(id, action) {
       addLog(`You proposed to ${r.firstName} and they said yes!`, 'special');
       unlock('married');
       save();
-      return { ok: true, modal: { title: 'She Said Yes!', body: `<p>You and <b>${r.firstName}</b> are engaged. Wedding bells are in your future.</p><p class="modal-blue">Happiness +15</p>` }, achievements: checkAchievements() };
+      return { ok: true, modal: { title: `${r.firstName} Said Yes!`, body: `<p>You and <b>${r.firstName}</b> are engaged. Wedding bells are in your future.</p><p class="modal-blue">Happiness +15</p>` }, achievements: checkAchievements() };
     }
     case 'baby': {
       if (p.age < 18) return { ok: false, message: 'You are too young.' };

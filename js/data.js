@@ -232,7 +232,7 @@ export const CHALLENGE = {
 };
 
 export const TITLES = [
-  'Professional Couch Potato', 'Certified Bitizen', 'Chaos Coordinator', 'Local Legend',
+  'Professional Couch Potato', 'Certified Citizen', 'Chaos Coordinator', 'Local Legend',
   'Retired Overachiever', 'Weekend Millionaire', 'Neighborhood Icon', 'Main Character',
 ];
 
