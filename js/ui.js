@@ -370,7 +370,7 @@ function renderJobPanel(body) {
     if (act === 'retire') confirmModal('Retire?', 'You will stop working and receive a pension.', () => { const r = G.retire(); handleResult(r); renderGame(); renderPanelBody(); });
   });
   $$('[data-job]', body).forEach(b => b.onclick = () => {
-    const j = G.jobListings().find(x => x.id === b.dataset.job);
+    const j = listings.find(x => x.id === b.dataset.job);
     if (j) showJobModal(j);
   });
   $$('[data-open-activities]', body).forEach(b => b.onclick = () => { panel = { type: 'activities', view: { kind: 'category', id: b.dataset.openActivities, title: 'Education' } }; renderPanelBody(); });
@@ -730,7 +730,7 @@ function runActivity(id) {
 // ---------------------------------------------------------------------------
 function renderMenuPanel(body) {
   const p = G.state.player;
-  const title = p.age >= 65 ? 'Retired Legend' : p.age >= 30 ? 'Certified Bitizen' : 'Rising Star';
+  const title = p.age >= 65 ? 'Retired Legend' : p.age >= 30 ? 'Certified Citizen' : 'Rising Star';
   const row = (id, emoji, label, sub) => `<button class="list-row" data-menu="${id}"><span class="row-emoji">${emoji}</span><span class="row-main"><span class="row-title">${label}</span><span class="row-sub">${sub}</span></span><span class="row-chev">›</span></button>`;
   let html = `<div class="panel-note">${esc(title)} · Age ${p.age}</div>`;
   html += `<div class="section-label">Life</div><div class="menu-list">
@@ -1116,7 +1116,7 @@ function wireCreate() {
 function wireGame() {
   $('#btnMenu').onclick = () => openPanel('menu');
   $('#btnChallenge').onclick = showChallengeModal;
-  $('#btnBitizen').onclick = showProfileModal;
+  $('#btnCitizen').onclick = showProfileModal;
   $('#btnPray').onclick = () => {
     const r = G.pray();
     renderGame();

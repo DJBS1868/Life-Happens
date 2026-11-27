@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// BitLife-style minigames: slots, blackjack, scratch cards and crime timing.
+// Life-sim minigames: slots, blackjack, scratch cards and crime timing.
 // These modules only touch game state through the exported game helpers; the
 // UI layer passes in its modal helpers so there is no circular import.
 // ---------------------------------------------------------------------------

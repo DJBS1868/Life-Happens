@@ -361,7 +361,7 @@ svg { display: block; }
 .challenge-pixels { display: flex; gap: 1.5px; padding: 0 3px 2px; }
 .challenge-pixels i { flex: 1; height: 7px; background: #fff; opacity: .9; }
 .challenge-name { display: block; background: #7d1a1a; color: #fff; font-size: 5.6px; font-weight: 700; line-height: 1; padding: 2px 3px 2.5px; white-space: nowrap; }
-.bitizen-badge {
+.citizen-badge {
   flex: 0 0 auto;
   width: 47px; height: 30px;
   background: linear-gradient(180deg, #37d3d3, #129e9e);
@@ -372,9 +372,13 @@ svg { display: block; }
 }
 .version-tag { display: none; }
 @media (max-width: 374px) {
-  .challenge-chip { min-width: 62px; }
+  .app-header { gap: 5px; padding-left: 7px; padding-right: 7px; }
+  .hamburger { width: 32px; height: 32px; }
+  .brand-header .brand-word { font-size: 15.5px; }
+  .brand-header .brand-mark { width: 24px; height: 24px; }
+  .challenge-chip { min-width: 46px; height: 31px; }
   .challenge-name { display: none; }
-  .bitizen-badge { display: none; }
+  .citizen-badge { display: grid; place-items: center; width: 40px; height: 27px; font-size: 6.4px; }
 }
 
 /* ==========================================================================
@@ -572,17 +576,17 @@ svg { display: block; }
 .age-label { font-size: 17px; font-weight: 800; letter-spacing: -.3px; margin-top: 4px; text-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
 .age-down {
   position: absolute;
-  left: calc(50% + 29px);
-  top: 23px;
-  width: 31px; height: 31px; border-radius: 50%;
+  left: calc(50% + 14px);
+  top: 30px;
+  width: 27px; height: 27px; border-radius: 50%;
   background: radial-gradient(circle at 38% 30%, #ff5f57, #d2241d 60%, #9c1510);
   border: 2.5px solid #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, .5);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   color: #fff; line-height: .8; z-index: 5;
 }
-.age-down span:first-child { font-size: 16px; font-weight: 600; line-height: .7; }
-.age-down span:last-child { font-size: 7px; font-weight: 700; margin-top: 1px; }
+.age-down span:first-child { font-size: 18px; font-weight: 600; line-height: .7; margin-top: -1px; }
+.age-down span:last-child { display: none; }
 .age-down:active { transform: scale(.94); }
 
 .stats-panel {
@@ -619,7 +623,7 @@ svg { display: block; }
 .stat-row.tiny .stat-pct { display: none; }
 
 /* ==========================================================================
-   Panel — BitLife-style light menu
+   Panel — life-sim light menu
    ========================================================================== */
 .row-emoji {
   border-radius: 50%; background: #171b20;
@@ -1225,7 +1229,7 @@ svg { display: block; }
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .panel-open .toast { bottom: calc(30px + var(--safe-bottom)); }
-.fx { position: absolute; inset: 0; pointer-events: none; z-index: 55; overflow: hidden; }
+.fx { position: absolute; inset: 0; pointer-events: none; z-index: 15; overflow: hidden; }
 .fx-bit { position: absolute; font-size: 18px; animation: bitFly 1.15s ease-out forwards; }
 
 /* ==========================================================================
@@ -1268,7 +1272,7 @@ svg { display: block; }
   .age-btn { width: 72px; height: 72px; top: -18px; }
   .age-plus { font-size: 34px; }
   .age-label { font-size: 15px; }
-  .age-down { top: 39px; width: 34px; height: 34px; }
+  .age-down { left: calc(50% + 10px); top: 30px; width: 26px; height: 26px; }
   .nav-icon { width: 34px; height: 34px; }
   .nav-label { font-size: 9.6px; }
   .life-log { padding-bottom: 20px; }
@@ -1276,10 +1280,11 @@ svg { display: block; }
 }
 @media (max-width: 350px) {
   .stat-name { width: 74px; font-size: 13px; }
-  .brand-header .brand-word { font-size: 17px; }
-  .brand-header .brand-mark { width: 26px; height: 26px; }
+  .brand-header .brand-word { font-size: 15.5px; }
+  .brand-header .brand-mark { width: 24px; height: 24px; }
   .char-name { font-size: 18px; }
   .money-value { font-size: 19px; }
-  .nav-label { font-size: 9px; }
+  .nav-label { font-size: 8.6px; }
   .age-btn { width: 70px; height: 70px; }
+  .age-down { left: calc(50% + 9px); top: 32px; width: 25px; height: 25px; }
 }
