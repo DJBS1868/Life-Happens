@@ -5,6 +5,7 @@ import {
 } from './data.js';
 import { avatarSVG, randomAvatar, flagSVG } from './avatar.js';
 import * as G from './game.js';
+import { openCasino, openLottery, openCrime } from './minigames.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -654,9 +655,14 @@ function renderActivitiesPanel(body) {
   const p = G.state.player;
   let html = '';
   if (p.prison > 0) {
-    html += `<div class="panel-note">⛓️ You are in prison. Most activities are unavailable.</div>`;
+    html += `<div class="panel-note">⛓️ In prison · ${p.prison} year${p.prison === 1 ? '' : 's'} left</div>`;
+    html += `<div class="section-label">Prison</div><div class="menu-list">
+      <button class="list-row" data-prison="escape"><span class="row-emoji">🏃</span><span class="row-main"><span class="row-title">Attempt Escape</span><span class="row-sub">Timing minigame · High risk</span></span><span class="row-chev">›</span></button>
+      <button class="list-row" data-prison="behave"><span class="row-emoji">😇</span><span class="row-main"><span class="row-title">Good Behavior</span><span class="row-sub">Reduce your sentence by a year</span></span><span class="row-chev">›</span></button>
+      <button class="list-row" data-prison="workout"><span class="row-emoji">💪</span><span class="row-main"><span class="row-title">Prison Workout</span><span class="row-sub">Health and happiness up</span></span><span class="row-chev">›</span></button>
+    </div>`;
   }
-  html += `<div class="menu-list">`;
+  html += `<div class="section-label">Activities</div><div class="menu-list">`;
   for (const c of ACTIVITY_CATEGORIES) {
     html += `<button class="list-row" data-cat="${c.id}" ${p.prison > 0 ? 'disabled' : ''}>
       <span class="row-emoji">${c.icon}</span><span class="row-main"><span class="row-title">${c.name}</span><span class="row-sub">${c.desc}</span></span><span class="row-chev">›</span>
@@ -665,6 +671,17 @@ function renderActivitiesPanel(body) {
   html += `</div>`;
   body.innerHTML = html;
   $$('[data-cat]', body).forEach(b => b.onclick = () => pushView({ kind: 'category', id: b.dataset.cat, title: ACTIVITY_CATEGORIES.find(c => c.id === b.dataset.cat)?.name || 'Activities' }));
+  $$('[data-prison]', body).forEach(b => b.onclick = () => {
+    const act = b.dataset.prison;
+    if (act === 'escape') {
+      confirmModal('Attempt to escape?', 'If you fail, years will be added to your sentence.', () => openCrime('escape', miniApi));
+    } else {
+      const res = G.prisonAction(act);
+      handleResult(res);
+      renderGame();
+      renderPanelBody();
+    }
+  });
 }
 
 function renderCategory(body, id) {
@@ -687,11 +704,20 @@ function renderCategory(body, id) {
   $$('[data-act]', body).forEach(b => b.onclick = () => {
     const a = ACTIVITY_ACTIONS[b.dataset.act];
     if (!a) return;
+    if (a.id === 'casino') { openCasino(miniApi); return; }
+    if (a.id === 'lottery') { openLottery(miniApi); return; }
     if (a.category === 'crime') {
-      confirmModal(`Commit ${a.name}?`, 'This is illegal. If you get caught, you could go to prison.', () => runActivity(a.id));
+      confirmModal(`Commit ${a.name}?`, 'This is illegal. If you get caught, you could go to prison.', () => openCrime(a.id, miniApi));
     } else runActivity(a.id);
   });
 }
+const miniApi = {
+  showModal,
+  closeModal,
+  toast,
+  refresh: () => { renderGame(); if (panel.type) renderPanelBody(); },
+  showResult: handleResult,
+};
 function runActivity(id) {
   const res = G.doActivity(id);
   handleResult(res);

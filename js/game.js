@@ -1045,7 +1045,7 @@ function askOut(person) {
   return { toast: `${person.firstName} said no. Ouch.` };
 }
 
-function commitCrime(id) {
+export function commitCrime(id, forced = null) {
   const p = state.player;
   const crimes = {
     shoplift: { chance: .78, reward: () => randInt(40, 300), fine: () => randInt(100, 600), prison: () => (chance(.3) ? 1 : 0), name: 'shoplifting' },
@@ -1056,7 +1056,8 @@ function commitCrime(id) {
   };
   const c = crimes[id];
   const bonus = (p.stats.smarts - 50) * .003 + (p.stats.looks - 50) * .001;
-  if (chance(clamp(c.chance + bonus, .05, .95))) {
+  const success = forced === null ? chance(clamp(c.chance + bonus, .05, .95)) : !!forced;
+  if (success) {
     const amt = c.reward();
     if (amt) changeMoney(amt);
     bump('happiness', 4);
@@ -1083,6 +1084,45 @@ function commitCrime(id) {
   }
   save();
   return { ok: true, modal: { title: 'Busted!', body }, achievements: checkAchievements() };
+}
+
+// ---------------------------------------------------------------------------
+// Prison
+// ---------------------------------------------------------------------------
+export function prisonAction(action, forced = null) {
+  const p = state.player;
+  if (!p || p.prison <= 0) return { ok: false, message: 'You are not in prison.' };
+  if (action === 'escape') {
+    const success = forced === null ? chance(.18) : !!forced;
+    if (success) {
+      p.prison = 0;
+      bump('happiness', 15);
+      addLog('You escaped from prison!', 'special');
+      save();
+      return { ok: true, modal: { title: 'Jailbreak!', body: '<p>You slipped past the guards and vanished into the night. You are free again.</p><p class="modal-blue">Happiness +15</p>' }, achievements: checkAchievements() };
+    }
+    const extra = randInt(1, 2);
+    p.prison += extra;
+    bump('happiness', -10);
+    addLog(`Your escape attempt failed. ${extra} more year${extra === 1 ? '' : 's'} added to your sentence.`, 'neg');
+    save();
+    return { ok: true, modal: { title: 'Escape Failed', body: `<p>The guards caught you halfway over the wall.</p><p class="modal-blue">Sentence extended by ${extra} year${extra === 1 ? '' : 's'}.</p>` }, achievements: checkAchievements() };
+  }
+  if (action === 'behave') {
+    p.prison = Math.max(0, p.prison - 1);
+    bump('happiness', 2);
+    addLog(p.prison > 0 ? 'You kept your head down and earned good behavior credit.' : 'You served your time and walked out a free person.', 'pos');
+    save();
+    return { ok: true, message: p.prison > 0 ? 'Sentence reduced by one year.' : 'You are free!' };
+  }
+  if (action === 'workout') {
+    bump('health', 4);
+    bump('happiness', 2);
+    addLog('You worked out in the prison yard.', 'pos');
+    save();
+    return { ok: true, message: 'Health +4 · Happiness +2' };
+  }
+  return { ok: false, message: 'Unknown action.' };
 }
 
 // ---------------------------------------------------------------------------
