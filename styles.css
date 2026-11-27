@@ -950,7 +950,7 @@ svg { display: block; }
 }
 .modal-head {
   flex: 0 0 auto;
-  background: linear-gradient(90deg, #f7f0e4 0%, #f4c493 34%, #ee8345 62%, #e8452c 100%);
+  background: linear-gradient(90deg, #f6c15a 0%, #f19a3e 30%, #ec6a30 62%, #e23a26 100%);
   padding: 12px 16px;
   color: #fff;
   text-align: right;
@@ -959,7 +959,7 @@ svg { display: block; }
   font-style: italic;
   letter-spacing: -.2px;
   text-shadow: 0 2px 2px rgba(0, 0, 0, .28);
-  border-bottom: 2px solid #d8452c;
+  border-bottom: 2px solid #cf3a22;
   position: relative;
 }
 .modal-head::after {
@@ -1064,6 +1064,148 @@ svg { display: block; }
 }
 .country-option:active { background: #f0e8da; }
 .country-option .flag-inline { width: 22px; height: 22px; border: 1px solid rgba(0, 0, 0, .15); }
+
+/* ==========================================================================
+   Minigames
+   ========================================================================== */
+.mg { font-size: 13px; color: #3a3a3a; }
+.mg-top {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  margin-bottom: 10px; font-size: 10px; color: #6e7d89;
+  text-transform: uppercase; letter-spacing: .5px; font-weight: 700;
+}
+.mg-top b { color: #0d5d99; font-size: 13px; letter-spacing: 0; text-transform: none; }
+.mg-bank b { color: #249a3d; }
+.mg-hint { text-align: center; color: #5f7180; margin: 0 0 12px; font-size: 12.5px; line-height: 1.4; }
+.mg-hint b { color: #0d5d99; }
+.mg-pick-art { font-size: 46px; text-align: center; margin: 2px 0 8px; }
+.mg-btn {
+  min-height: 40px; padding: 0 14px; border-radius: 8px;
+  border: 1px solid #b7aa94;
+  background: linear-gradient(180deg, #fffdf7, #ece3d3);
+  color: #4a4237; font-size: 13.5px; font-weight: 800;
+  box-shadow: inset 0 1px 0 #fff, 0 2px 3px rgba(0, 0, 0, .12);
+}
+.mg-btn:active { filter: brightness(1.04); }
+.mg-btn:disabled { opacity: .45; }
+.mg-btn.primary {
+  border-color: #1668a8;
+  background: linear-gradient(180deg, #2f95e2, #1a70b8);
+  color: #fff; text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
+}
+.mg-actions { display: flex; gap: 7px; margin-top: 12px; }
+.mg-actions .mg-btn { flex: 1; min-width: 0; padding: 0 4px; font-size: 12px; white-space: nowrap; }
+.mg-actions [data-deal] { flex: 1.25; }
+.mg-result {
+  margin-top: 10px; padding: 8px 10px; border-radius: 6px;
+  background: #ece4d7; color: #6b5f4e; text-align: center;
+  font-size: 12.5px; font-weight: 700; min-height: 34px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mg-result.win { background: #d9f0d9; color: #1f7a2e; }
+.mg-result.lose { background: #f6dcd8; color: #a52a1e; }
+.mg-crime .mg-btn { width: 100%; margin-top: 8px; }
+.modal-ok:disabled { opacity: .5; }
+
+/* Slots */
+.mg-reels {
+  display: flex; gap: 8px; justify-content: center; padding: 12px 10px;
+  background: linear-gradient(180deg, #2a2f36, #14171b);
+  border: 3px solid #c99a2e; border-radius: 10px;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, .6);
+}
+.mg-reel {
+  flex: 1; height: 86px; display: grid; place-items: center;
+  background: linear-gradient(180deg, #fffdf2, #efe4c8);
+  border-radius: 7px; border: 2px solid #8c6b1f;
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, .18);
+  overflow: hidden;
+}
+.mg-reel span { font-size: 40px; line-height: 1; }
+.mg-paytable {
+  display: flex; justify-content: space-between; gap: 6px;
+  margin-top: 8px; font-size: 9.5px; color: #7a6a4f; text-align: center;
+}
+.mg-btn-spin {
+  width: 100%; margin-top: 10px;
+  background: linear-gradient(180deg, #f6c744, #d99a12);
+  border: 2px solid #a9760a; color: #3d2a00;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .4);
+  font-size: 15px;
+}
+
+/* Blackjack */
+.mg-table {
+  display: flex; flex-direction: column; align-items: stretch; gap: 7px;
+  background: radial-gradient(circle at 50% 35%, #1f7a4a, #0d4a2c 75%);
+  border: 2px solid #6b4a1f; border-radius: 10px; padding: 10px;
+}
+.mg-side { min-width: 0; }
+.mg-table-divider {
+  border-top: 1px dashed rgba(255, 255, 255, .22);
+  padding-top: 6px; text-align: center;
+  color: rgba(255, 255, 255, .5); font-size: 8px; font-weight: 800; letter-spacing: 1.6px;
+}
+.mg-hand-label {
+  display: flex; justify-content: space-between; gap: 4px;
+  color: #fff; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px;
+}
+.mg-hand-label b { color: #ffe57a; }
+.mg-hand { display: flex; flex-wrap: wrap; gap: 4px; min-height: 58px; align-items: center; }
+.mg-card {
+  width: 34px; height: 50px; background: #fffdf7;
+  border: 1px solid #b9ab90; border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-weight: 800; line-height: 1;
+}
+.mg-card span { font-size: 14px; }
+.mg-card i { font-style: normal; font-size: 13px; margin-top: 2px; }
+.mg-card.red { color: #c22a20; }
+.mg-card.black { color: #222; }
+.mg-card.back {
+  background: repeating-linear-gradient(45deg, #1d4f8a 0 4px, #2d6cb0 4px 8px);
+  border-color: #12365f;
+}
+
+/* Scratch card */
+.mg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.mg-cell {
+  position: relative; aspect-ratio: 1; border-radius: 8px;
+  border: 2px solid #c9a64a;
+  background: linear-gradient(135deg, #d9c47a, #b3923f);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .18), 0 2px 4px rgba(0, 0, 0, .18);
+  overflow: hidden;
+}
+.mg-cell-back {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 22px; font-weight: 900; color: #6d5416;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .4);
+}
+.mg-cell-sym {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 28px; background: #fffdf5;
+  opacity: 0; transform: scale(.6); transition: opacity .15s, transform .15s;
+}
+.mg-cell.revealed .mg-cell-sym { opacity: 1; transform: none; }
+.mg-cell.revealed { border-color: #d8cfae; }
+
+/* Crime timing meter */
+.mg-meter {
+  position: relative; height: 30px; margin: 14px 0 4px;
+  background: #2a2f36; border: 2px solid #171b20; border-radius: 15px;
+  overflow: hidden; box-shadow: inset 0 2px 6px rgba(0, 0, 0, .5);
+}
+.mg-zone {
+  position: absolute; top: 0; bottom: 0;
+  background: linear-gradient(180deg, #55d465, #1f9e37);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, .25);
+}
+.mg-marker {
+  position: absolute; top: -3px; bottom: -3px; width: 4px; margin-left: -2px;
+  background: #ffe600; border-radius: 2px; box-shadow: 0 0 8px #ffe600;
+}
 
 /* ==========================================================================
    Toast / FX

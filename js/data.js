@@ -174,8 +174,8 @@ export const ACTIVITY_CATEGORIES = [
   {
     id: 'money', name: 'Money & Finance', icon: '💰', desc: 'Grow your bank balance',
     actions: [
-      { id: 'lottery', name: 'Buy a Lottery Ticket', icon: '🎟️', sub: '$10 · Win big?', cost: 10, minAge: 18 },
-      { id: 'casino', name: 'Gamble at the Casino', icon: '🎰', sub: '$1,000 · 50/50', cost: 1000, minAge: 18 },
+      { id: 'lottery', name: 'Buy a Lottery Ticket', icon: '🎟️', sub: '$10 · Scratch to win', cost: 10, minAge: 18 },
+      { id: 'casino', name: 'Gamble at the Casino', icon: '🎰', sub: 'Slots & blackjack · $1,000', cost: 1000, minAge: 18 },
       { id: 'stocks', name: 'Invest in Stocks', icon: '📈', sub: '$5,000 · Risky', cost: 5000, minAge: 18 },
       { id: 'charity', name: 'Donate to Charity', icon: '🤝', sub: '$1,000 · Karma up', cost: 1000 },
       { id: 'loan', name: 'Take a Bank Loan', icon: '🏦', sub: 'Borrow $10,000', cost: 0, minAge: 18 },
@@ -193,11 +193,11 @@ export const ACTIVITY_CATEGORIES = [
   {
     id: 'crime', name: 'Crime', icon: '🚨', desc: 'Break the law. Risk it all.',
     actions: [
-      { id: 'shoplift', name: 'Shoplift', icon: '🛍️', sub: 'Small risk · Small reward', cost: 0, minAge: 10 },
-      { id: 'pickpocket', name: 'Pickpocket', icon: '🕵️', sub: 'Medium risk · Cash', cost: 0, minAge: 12 },
-      { id: 'carjack', name: 'Steal a Car', icon: '🔑', sub: 'High risk · Big reward', cost: 0, minAge: 16 },
-      { id: 'bankrob', name: 'Rob a Bank', icon: '🏦', sub: 'Huge risk · Huge reward', cost: 0, minAge: 18 },
-      { id: 'assault', name: 'Start a Fight', icon: '🥊', sub: 'Violence · Prison risk', cost: 0, minAge: 16 },
+      { id: 'shoplift', name: 'Shoplift', icon: '🛍️', sub: 'Timing minigame · Small risk', cost: 0, minAge: 10 },
+      { id: 'pickpocket', name: 'Pickpocket', icon: '🕵️', sub: 'Timing minigame · Cash', cost: 0, minAge: 12 },
+      { id: 'carjack', name: 'Steal a Car', icon: '🔑', sub: 'Timing minigame · Big reward', cost: 0, minAge: 16 },
+      { id: 'bankrob', name: 'Rob a Bank', icon: '🏦', sub: 'Timing minigame · Huge reward', cost: 0, minAge: 18 },
+      { id: 'assault', name: 'Start a Fight', icon: '🥊', sub: 'Timing minigame · Prison risk', cost: 0, minAge: 16 },
     ],
   },
 ];
